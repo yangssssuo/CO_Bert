@@ -29,4 +29,4 @@ validate_loader = DataLoader(validate_dataset, batch_size=bsz, shuffle=True, num
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True, num_workers=24)
 
 trainer = ModelTrainer(model)
-trainer.start_training(train_dataloader=train_loader,valid_dataloader=validate_loader,test_loader=test_loader,epochs=100)
+trainer.start_training(train_dataloader=train_loader,valid_dataloader=validate_loader,test_loader=test_loader,epochs=1000)
