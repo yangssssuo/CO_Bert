@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from torch.nn.init import normal_
-from BertConfig import BertConfig
+from .BertConfig import BertConfig
 
 def get_activation(activation_string):
     act = activation_string.lower()
@@ -119,8 +119,8 @@ class BertEncoder(nn.Module):
     def forward(self,x):
         x = self.emb(x)
         for layer in self.bert_layers:
-            # x = x + layer(x)
-            x = layer(x,x,x)
+            x = x + layer(x,x,x)
+            # x = layer(x,x,x)
         x = self.out(x)
         x = x.permute(0,2,1)
         #return size [bsz,1,seq_len]
@@ -139,20 +139,20 @@ class BertForPretrain(nn.Module):
         self.encoder = BertEncoder(config)
         self.eads_pred = nn.Linear(config.seq_len,6)
         self.cls_pred = nn.Linear(config.seq_len,7)
-        self.loss_func1 = nn.MSELoss(reduction='mean')
+        self.loss_func1 = nn.L1Loss(reduction='mean')
         self.loss_func2 = nn.CrossEntropyLoss()
 
     def forward(self,input,eads,sys_cls):
         encoder_out = self.encoder(input)
         eads_pred = self.eads_pred(encoder_out)
-        cls_pred = self.cls_pred(encoder_out)
+        cls_pred = self.cls_pred(F.sigmoid(encoder_out))
         cls_vec = torch.concat([F.softmax(cls_pred[:,:,:2],dim=2), 
                                 F.softmax(cls_pred[:,:,2:4],dim=2), 
                                 F.softmax(cls_pred[:,:,4:],dim=2)],
                                 dim=2)
         
         loss1 = self.loss_func1(eads,eads_pred)
-        loss2 = self.loss_func2(sys_cls,cls_vec)
+        loss2 = self.loss_func2(cls_vec,sys_cls.float())
 
         loss = loss1 + loss2
 

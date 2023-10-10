@@ -9,48 +9,63 @@ class CO_Set(Dataset):
     length 30 
     [atom info 6 + freq*6 + ir*6 + raman*6 + eads +delta e + eb + d band + wf + dipole alpha]
     '''
-    def __init__(self,file_path) -> None:
+    def __init__(self,name_lis,mode='IR') -> None:
         super(CO_Set,self).__init__()
-
-        aaa = pd.read_csv(file_path).dropna()
-        self.name = aaa.iloc[:,0:1].values
-        self.sys_feature = aaa.iloc[:,1:].values
+        self.file_path = '/home/yanggk/Data/CO_Bert/'
+        aaa = pd.read_csv(name_lis,header=None)
+        self.name = aaa.values.reshape(-1).tolist()
+        self.mode = mode
 
     def __len__(self):
-        return len(self.sys_feature)
+        return len(self.name)
     
     def __getitem__(self, index):
-        if self.name[index] == 'NO-Au':
-            name = [8,16,7,14,79,196]
-        elif self.name[index] == 'NO-Ag':
-            name = [8,16,7,14,47,108]
-        elif self.name[index] == 'CO-Ag':
-            name = [8,16,6,12,47,108]
-        elif self.name[index] == 'CO-Au':
-            name = [8,16,6,12,79,196]
-        name = torch.tensor(name,dtype=torch.float32)
-        feature = torch.tensor(self.sys_feature[index].astype('float32'))
-        ori = torch.concat((name,feature))
-        masked = self._mask(ori)
-        return masked.unsqueeze(1), ori.unsqueeze(1)
+        name = self.name[index]
+
+        if self.mode == 'IR':
+            path = self.file_path + 'IR/data/' + name + '.txt'
+        data = pd.read_csv(path,header=None,index_col=0,dtype='float32').values
+        ori_spec = self.min_max(torch.tensor(data))
+        
+        prop_path = self.file_path + 'Property/' + name + '.csv'
+        prop_data = pd.read_csv(prop_path,index_col=0).values.tolist()
+        prop_data = torch.tensor(prop_data)
+
+        label = self._get_label(name)
+
+
+        return ori_spec,label,prop_data
     
-
-    def _mask(self,item):
-
-        mask_idx = random.sample(range(0,30),6)
-        for idx in mask_idx:
-            if random.random() < 0.8:
-                item[idx] = 0.0
-            else:
-                if random.random() < 0.5:
-                    item[idx] = item[random.randint(0,29)]
-                else:pass
-        return item
-
-
+    def min_max(self,t):
+        min_t = torch.min(t)
+        max_t = torch.max(t)
+        return (t - min_t) * 100 / (max_t-min_t)
+    
+    def _get_label(self,name):
+        name_lis = name.split('-')
+        sys = name_lis[0]
+        metal = name_lis[1]
+        pos = name_lis[2]
+        sys_tok = torch.tensor([[1,0]]) if sys == 'CO' else torch.tensor([[0,1]])
+        metal_tok = torch.tensor([[1,0]]) if metal == 'Au' else torch.tensor([[0,1]])
+        if pos == 'top':
+            pos_tok = torch.tensor([[1,0,0]])
+        elif pos == 'hollow':
+            pos_tok = torch.tensor([[0,1,0]])
+        elif pos == 'bridge':
+            pos_tok = torch.tensor([[0,0,1]])
+        label = torch.concat([sys_tok,metal_tok,pos_tok],dim=1)
+        return label
 
 if __name__ == '__main__':
-    aaa = CO_Set('/home/yanggk/Data/CO_Bert/data.csv')
-    print(aaa[0])
-    print(aaa[0].shape)
+    aaa = CO_Set('/home/yanggk/Data/CO_Bert/name.txt')
+    # print(aaa[0])
+    # print(aaa[1][0].shape)
+    print(aaa[1][1])
+    print(aaa[10000][1])
+
+    # aaa = pd.read_csv("/home/yanggk/Data/CO_Bert/Property/CO-Ag-bridge-1-1.csv",index_col=0)
+    # bbb = aaa.values.tolist() 
+    # bbb = torch.tensor(bbb)
+    # print(bbb.t().shape)
 
