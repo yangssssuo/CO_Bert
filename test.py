@@ -8,12 +8,17 @@ from torch.utils.data import Dataset, DataLoader
 from model.Trainer import ModelTrainer
 
 
-json_file = 'config.json'
+json_file = 'config/config.json'
 config = BertConfig.from_json_file(json_file)
 model = BertForPretrain(config)
-test_set = CO_Set('/home/yanggk/Data/CO_Bert/name.txt')
+test_set = CO_Set('/home/yanggk/Data/CO_Bert/washed.txt',mode='Raman')
+
+# for item,_,_ in test_set:
+#     print(item.max())
+
 
 set_size = len(test_set)
+print(set_size)
 train_size = int(0.9*set_size)
 test_size = int(0.05*set_size)
 val_size = set_size - train_size -test_size
@@ -29,4 +34,13 @@ validate_loader = DataLoader(validate_dataset, batch_size=bsz, shuffle=True, num
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True, num_workers=24)
 
 trainer = ModelTrainer(model)
-trainer.start_training(train_dataloader=train_loader,valid_dataloader=validate_loader,test_loader=test_loader,epochs=1000)
+trainer.start_training(train_dataloader=train_loader,valid_dataloader=validate_loader,test_loader=test_loader,epochs=100)
+
+# count = 0
+# for n,(input,_,_) in enumerate(train_loader):
+#     # print(input.max())
+#     for item in input:
+#         # print(item.max())
+#         if item.max() != 100.0:
+#             count +=1
+# print(count)

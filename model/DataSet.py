@@ -24,8 +24,12 @@ class CO_Set(Dataset):
 
         if self.mode == 'IR':
             path = self.file_path + 'IR/data/' + name + '.txt'
+        elif self.mode == 'Raman':
+            path = self.file_path + 'Raman/data/' + name + '.txt'
         data = pd.read_csv(path,header=None,index_col=0,dtype='float32').values
-        ori_spec = self.min_max(torch.tensor(data))
+        # ori_spec = self.min_max(torch.tensor(data))
+        ori_spec = torch.tensor(data)
+        # ori_spec = torch.nn.functional.sigmoid(torch.tensor(data))
         
         prop_path = self.file_path + 'Property/' + name + '.csv'
         prop_data = pd.read_csv(prop_path,index_col=0).values.tolist()
