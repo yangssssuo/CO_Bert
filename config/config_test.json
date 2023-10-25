@@ -1,9 +1,9 @@
 {
     "vocab_size":1,
-    "hidden_size": 16,
+    "hidden_size": 128,
     "num_hidden_layers": 6,
     "num_attention_heads":8,
-    "intermediate_size": 64,
+    "intermediate_size": 256,
     "act_fn":"tanh",
     "initializer_range": 0.02,
     "dropout": 0.1,

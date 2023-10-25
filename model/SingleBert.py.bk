@@ -66,8 +66,8 @@ class BertInter(nn.Module):
         self.act_fn = get_activation(config.act_fn)
 
     def forward(self,x):
-        x = self.act_fn(x)
         x = self.linear(x)
+        x = self.act_fn(x)
         return x
     
 class BertOutput(nn.Module):
@@ -181,19 +181,17 @@ class BertForPretrain(nn.Module):
     
 
 if __name__ == '__main__':
-    json_file = 'config/config.json'
+    json_file = 'config.json'
     config = BertConfig.from_json_file(json_file)
-    # aaa = torch.randn(32,400,1)
+    aaa = torch.randn(32,400,1)
     net = BertForPretrain(config)
-    print(net)
-    print(net.parameters)
-    # bbb = torch.randn(32,1,6)
-    # ccc = torch.ones(32,1,7)
+    bbb = torch.randn(32,1,6)
+    ccc = torch.ones(32,1,7)
 
-    # xxx = net(aaa,bbb,ccc)
-    # print(xxx[0])
-    # print(xxx[1].shape)
-    # print(xxx[2].shape)
+    xxx = net(aaa,bbb,ccc)
+    print(xxx[0])
+    print(xxx[1].shape)
+    print(xxx[2].shape)
 
 
 
