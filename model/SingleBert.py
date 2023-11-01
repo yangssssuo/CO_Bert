@@ -4,6 +4,18 @@ import torch.nn.functional as F
 from torch.nn.init import normal_
 from .BertConfig import BertConfig
 
+def swish(x):
+    return x * F.sigmoid(x)
+
+# used as class:
+class Swish(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        return x * F.sigmoid(x)
+
+
 def get_activation(activation_string):
     act = activation_string.lower()
     if act == "linear":
@@ -14,6 +26,10 @@ def get_activation(activation_string):
         return nn.GELU()
     elif act == "tanh":
         return nn.Tanh()
+    elif act == "leakyrelu":
+        return nn.LeakyReLU()
+    elif act == "swish":
+        return Swish()
     else:
         raise ValueError("Unsupported activation: %s" % act)
 
@@ -62,12 +78,14 @@ class BertSelfAtten(nn.Module):
 class BertInter(nn.Module):
     def __init__(self, config) -> None:
         super().__init__()
-        self.linear = nn.Linear(config.hidden_size,config.intermediate_size)
+        self.conv = nn.Conv1d(config.hidden_size,config.intermediate_size,kernel_size=1,stride=1)
         self.act_fn = get_activation(config.act_fn)
 
     def forward(self,x):
         x = self.act_fn(x)
-        x = self.linear(x)
+        x = x.permute(0,2,1)
+        x = self.conv(x)
+        x = x.permute(0,2,1)
         return x
     
 class BertOutput(nn.Module):
@@ -103,7 +121,7 @@ class BertEncoder(nn.Module):
         self.emb = BertEmbedding(config)
         self.bert_layers = nn.ModuleList([BertLayer(config) for _ in range(config.num_hidden_layers)])
         self.out = nn.Linear(config.hidden_size,1)
-        self._reset_parameters(config.initializer_range)
+        # self._reset_parameters(config.initializer_range)
 
     def _reset_parameters(self, initializer_range):
         r"""Initiate parameters."""

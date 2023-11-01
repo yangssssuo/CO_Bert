@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-from model.BertConfig import BertConfig
-from model.SingleBert import BertForPretrain
+from model.BertConfigConv import BertConfig
+from model.conv_bert import BertForPretrain
 
 
 
-json_file = 'config/config_test.json'
+json_file = 'config/config_conv.json'
 config = BertConfig.from_json_file(json_file)
 model = BertForPretrain(config)
 print(model)

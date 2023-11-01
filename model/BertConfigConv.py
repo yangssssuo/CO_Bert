@@ -18,8 +18,7 @@ class BertConfig(object):
                  dropout=0.1,
                  hidden_dropout_prob=0.1,
                  attn_dropout=0.1,
-                 seq_len = 400,
-                 conv_size = 64,
+                 seq_len = 1000,
                  hidden_len = 512
 ):
         self.vocab_size = vocab_size
@@ -33,7 +32,6 @@ class BertConfig(object):
         self.initializer_range = initializer_range
         self.dropout = dropout
         self.seq_len = seq_len
-        self.conv_size = conv_size
         self.hidden_len = hidden_len
 
     @classmethod

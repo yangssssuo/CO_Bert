@@ -35,9 +35,9 @@ for name in names:
 # for n,item in enumerate(bbb['izz1']):
 #     if item >= 10000:
 #         count.add(names[n])
-for n,item in enumerate(bbb['Eads']):
-    if item >= 10:
-        count.add(bbb['sys'][n]+'-'+bbb['name'][n])
+# for n,item in enumerate(bbb['Eads']):
+#     if item >= 10:
+#         count.add(bbb['sys'][n]+'-'+bbb['name'][n])
 
 print(len(count))
 washed = set(names) ^ count
