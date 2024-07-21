@@ -1,0 +1,14 @@
+{
+    "vocab_size":1,
+    "hidden_size": 16,
+    "num_hidden_layers": 4,
+    "num_attention_heads":8,
+    "intermediate_size": 32,
+    "act_fn":"leakyrelu",
+    "initializer_range": 0.5,
+    "dropout": 0.2,
+    "hidden_dropout_prob": 0.2,
+    "attn_dropout": 0.2,
+    "seq_len": 1000,
+    "hidden_len":1000
+  }
